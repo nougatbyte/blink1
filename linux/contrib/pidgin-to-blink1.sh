@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-BLINK1=`which blink1-tool`
+BLINK1='which blink1-tool'
 
 # Pidgin's DBUS settings
 DBUS_INTERFACE="im.pidgin.purple.PurpleInterface"
@@ -39,6 +39,7 @@ dbus-monitor --profile \
     "type='signal',interface='$DBUS_INTERFACE',member='SavedstatusChanged'" \
     "type='signal',interface='$DBUS_INTERFACE',member='Quitting'" \
     "type='signal',interface='$DBUS_INTERFACE',member='SignedOn'" \
+    "type='signal',interface='$DBUS_INTERFACE',member='BuddyTyping'" \
     "type='signal',interface='$DBUS_INTERFACE',member='ReceivedImMsg'" |
 while read -r line; do
     
@@ -55,6 +56,10 @@ while read -r line; do
         $BLINK1 --rgb $STATUS_RECEIVE --blink $STATUS_RECEIVE_BLINK &> /dev/null
     fi
 
+    if [ "$message" == "BuddyTyping" ]; then
+        $BLINK1 --ledn 2 -t 50 --random=50 &> /dev/null
+        $BLINK1 --off &> /dev/null
+    fi
     # Get status text
     STATUS_ID=`dbus-send --print-reply=literal --dest=$DBUS_SERVICE $DBUS_PATH $DBUS_INTERFACE.PurpleSavedstatusGetCurrent | cut -d ' ' -f5`
     STATUS=`dbus-send --print-reply=literal --dest=$DBUS_SERVICE $DBUS_PATH $DBUS_INTERFACE.PurpleSavedstatusGetTitle int32:$STATUS_ID`
